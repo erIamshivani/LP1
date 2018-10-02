@@ -19,5 +19,7 @@ dtm = rpart(Species~., train, method = "class")
 rpart.plot(dtm)
 
 #addign various parameter.
-rpart.plot(dtm, type=4, extra=101)
+#rpart.plot(dtm, type=4, extra=101)
 
+p <-predict(dtm, test, type = "class")
+table(test[,5], p)
