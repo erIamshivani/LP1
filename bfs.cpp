@@ -1,99 +1,138 @@
 #include<iostream>
-#include<stdlib.h>
 #include<queue>
 using namespace std;
 
 class node
-{  
-  public:  node *left, *right; int data;
-};  
-class Breadthfs
-{ 
-  public:  node *insert(node *, int); 
-           void bfs(node *); 
+{
+	public: int data;
+			node *left;
+			node *right;
+			
+			node()
+			{
+				left=NULL;
+				right=NULL;
+				data=0;
+			}
 };
 
-node *insert(node *root, int data)
-{                     //inserts a node in tree
-    if(!root) 
-    {
-        root=new node;  
-        root->left=NULL;
-        root->right=NULL;
-        root->data=data;
-        return root;
-    }
-    queue<node *> q;
-    q.push(root);  
-    while(!q.empty())
-    {
-        node *temp=q.front();  q.pop();
-        if(temp->left==NULL)
-        {
-            temp->left=new node;
-            temp->left->left=NULL; 
-            temp->left->right=NULL;
-            temp->left->data=data;
-            return root;
-        } 
-        else
-        {
-            q.push(temp->left); 
-        }
-        if(temp->right==NULL)
-        {
-            temp->right=new node;  
-            temp->right->left=NULL; 
-            temp->right->right=NULL;
-            temp->right->data=data;
-            return root; 
-        }
-    else
-    {
-        q.push(temp->right);  
-    }
- }
-}
-
-void bfs(node *head)
+class Breadthfs
 {
-  queue<node*> q; 
-  q.push(head);    
-  int qSize;    
-  while (!q.empty())  
-  {   
-     qSize = q.size();   
-     #pragma omp parallel for                   //creates parallel threads 
-     for (int i = 0; i < qSize; i++)    
-     {
-        node* currNode;
-        #pragma omp critical  
-        {
-            currNode = q.front(); 
-            q.pop(); 
-            cout<<"\t"<<currNode->data;
-        }  //prints parent node
-        #pragma omp critical
-        {    
-           if(currNode->left) 
-              q.push(currNode->left);                   //push parent's left node in queue
-           if(currNode->right)  
-              q.push(currNode->right);    
-        }         //push parent's right node in queue
-   }  
-}
-}
+	public:
+		node *root;
+		node *head;
+		
+		Breadthfs()
+		{
+			root=NULL;
+			head=NULL;
+		}
+		
+		void insert(int data)
+		{
+			node *newnode = new node();
+			newnode->data=data;
+			if(root==NULL)
+			{
+				root=newnode;
+				root->data=data;
+				
+			}
+			else
+			{
+				node *curr=root;
+				
+				int flag=0;
+				char dir;
+				while(flag==0)
+				{
+					cout<<"\ncurrent node= "<<curr->data;
+					cout<<"\nEnter Direction(l or r) : ";
+					cin>>dir;
+					if(dir=='l')
+					{
+						if(curr->left==NULL)
+						{
+							curr->left= newnode;
+							flag=1;
+							
+						}
+						else
+						{
+							curr=curr->left;
+						}
+					}
+					else if(dir=='r')
+					{
+						if(curr->right==NULL)
+						{
+							curr->right= newnode;
+							flag=1;
+							
+						}
+						else
+						{
+							curr=curr->right;
+						}
+					}
+				}
+				
+			}
+		}
+	
+	
+	void bfs()
+{
+
+		queue<node*> q;
+		q.push(root);
+		
+		int qSize;
+		
+		while (!q.empty()) 
+		{
+			qSize = q.size();
+			#pragma omp parallel for
+			for (int i = 0; i < qSize; i++) 
+			{
+				node* currNode;
+				#pragma omp critical
+				{
+				  currNode = q.front();
+				  q.pop();
+				  cout<<"\t"<<currNode->data;
+				
+				}
+				#pragma omp critical
+				{
+				if(currNode->left)
+					q.push(currNode->left);
+				if(currNode->right)
+					q.push(currNode->right);
+				}		
+
+			}
+		}
+	}
+	
+};
+
 int main()
 {
-    node *root=NULL; int data; char ans;  
-    do
-    { 
-       cout<<"\n enter data=>"; 
-       cin>>data;
-       root=insert(root,data);   
-       cout<<"do you want insert one more node?";  
-       cin>>ans;
-    }while(ans=='y'||ans=='Y');
-    bfs(root);
-    return 0;
+	int data=213;
+	Breadthfs tree;
+	do
+	{
+		cout<<"\nEnter element ";
+		cin>>data;
+		if(data==0)
+		 break;
+		tree.insert(data);
+		
+	}
+	while(data!=0);
+	
+	tree.bfs();
+	
+	return 0;
 }
