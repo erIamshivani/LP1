@@ -4,7 +4,7 @@ import java.util.Scanner;
 class state
 {
 	int arr[];
-	int f=0,g=0;
+	int h=0;
 	state(state s)
 	{
 		this.arr = new int[9];
@@ -66,13 +66,13 @@ public class HillPuzz
 	
 	public int lowest()
 	{
-		int min=openlist.get(0).f;
+		int min=openlist.get(0).h;
 		int p=0;
 		for(int i=1;i<openlist.size();i++)
 		{
-			if(min>openlist.get(i).f)
+			if(min>openlist.get(i).h)
 			{
-				min=openlist.get(i).f;
+				min=openlist.get(i).h;
 				p=i;
 			}
 		}
@@ -118,9 +118,8 @@ public class HillPuzz
 			state ns = new state(s);
 			ns.arr[p]=ns.arr[p-3];
 			ns.arr[p-3]=0;
-			ns.g=s.g+1;
-			ns.f=ns.g+h(ns);
-			if(!inclose(ns))
+			ns.h=h(ns);
+			if(!inclose(ns))	
 				openlist.add(ns);
 		}
 		
@@ -129,8 +128,7 @@ public class HillPuzz
 			state ns = new state(s);
 			ns.arr[p]=ns.arr[p-1];
 			ns.arr[p-1]=0;
-			ns.g=s.g+1;
-			ns.f=ns.g+h(ns);
+			ns.h=h(ns);
 			if(!inclose(ns))
 				openlist.add(ns);
 		}
@@ -140,8 +138,7 @@ public class HillPuzz
 			state ns = new state(s);
 			ns.arr[p]=ns.arr[p+1];
 			ns.arr[p+1]=0;
-			ns.g=s.g+1;
-			ns.f=ns.g+h(ns);
+			ns.h=h(ns);
 			if(!inclose(ns))
 				openlist.add(ns);
 		}
@@ -151,22 +148,20 @@ public class HillPuzz
 			state ns = new state(s);
 			ns.arr[p]=ns.arr[p+3];
 			ns.arr[p+3]=0;
-			ns.g=s.g+1;
-			ns.f=ns.g+h(ns);
+			ns.h=h(ns);
 			if(!inclose(ns))
 				openlist.add(ns);
-		}
-		
+		}	
 	}
 	
 	public void astar()
 	{
-		int low=0,i=0;
-		ss.f=h(ss);
-		last=ss.f;
+		int low=0;
+		ss.h=h(ss);
+		last=ss.h;
 		openlist.add(ss);
 		System.out.println("Solution:");
-		while(i<7)
+		while(true)
 		{
 			low = lowest();
 			cs = openlist.get(low);
@@ -174,22 +169,31 @@ public class HillPuzz
 			System.out.println();
 			openlist.clear();
 			closelist.add(cs);
-			if(last==h(cs))
-				cnt++;
-			else
-				cnt=0;
-			last=h(cs);
-
-			if(h(cs)==0 || cnt==4)
+			if(last<h(cs))
 			{
-				if(cnt==4)
-					System.out.println("Goal state can't be reached since you are on plateau..");
-				else
-					System.out.println("Goal state reached!!");
+				System.out.println("Goal state can't be reached since you are on ridge..");
 				break;
-			}			
+			}
+			else if(h(cs)==0)
+			{
+				System.out.println("Goal state reached!!");
+				break;
+			}
+			else
+			{
+				if(last==h(cs))
+					cnt++;
+				else
+					cnt=0;
+				
+				if(cnt==3)
+				{
+					System.out.println("Goal state can't be reached since you are on plateau..");
+					break;
+				}
+			}
+			last=h(cs);		
 			move(cs);
-			i++;
 		}
 	}
 	
@@ -259,10 +263,6 @@ Solution:
 
  1 4 2
  8 3 0
- 7 6 5
-
- 1 4 2
- 8 0 3
  7 6 5
 
 Goal state can't be reached since you are on plateau..
